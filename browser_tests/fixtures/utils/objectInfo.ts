@@ -104,6 +104,31 @@ export function appendComboInputOptions(
   ])
 }
 
+/**
+ * Clones an existing node definition under a new type whose display name is
+ * `displayName`, so a test can put arbitrary text on the node-search result
+ * label without depending on a real node happening to contain it.
+ */
+export function addNodeWithDisplayName(
+  objectInfo: ObjectInfoResponse,
+  nodeType: string,
+  displayName: string,
+  donorNodeType = 'KSampler'
+): void {
+  const donor = objectInfo[donorNodeType]
+  if (!donor) {
+    throw new Error(`Missing object_info entry for ${donorNodeType}`)
+  }
+
+  objectInfo[nodeType] = {
+    ...donor,
+    name: nodeType,
+    display_name: displayName,
+    category: 'testing',
+    description: ''
+  }
+}
+
 export async function routeObjectInfoFromSetupApi(
   page: Page,
   customize?: (objectInfo: ObjectInfoResponse) => void | Promise<void>
