@@ -19,12 +19,11 @@ import {
   configValueOrDefault,
   remoteConfig
 } from '@/platform/remoteConfig/remoteConfig'
+import { createAssertReporter } from '@/platform/telemetry/assertionReporter'
 import { syncHostUserIdWithFirebaseAuth } from '@/platform/telemetry/hostUserIdSync'
 import { flushErrorReports } from '@/platform/telemetry/reportError'
 import '@/lib/litegraph/public/css/litegraph.css'
 import router from '@/router'
-import { isDesktop, isNightly } from '@/platform/distribution/types'
-import { useToastStore } from '@/platform/updates/common/toastStore'
 import { useBootstrapStore } from '@/stores/bootstrapStore'
 
 import App from './App.vue'
@@ -102,21 +101,7 @@ Sentry.init({
 
 flushErrorReports()
 
-// Assertion reporter receives pre-formatted messages (with "[Assertion failed]: " prefix).
-// Strings here are intentionally not i18n'd: they're developer/nightly diagnostics,
-// not user-facing in stable releases.
-setAssertReporter((message) => {
-  if (isDesktop) {
-    Sentry.captureMessage(message, { level: 'warning' })
-  }
-  if (isNightly) {
-    useToastStore(pinia).add({
-      severity: 'warn',
-      summary: 'Assertion failed',
-      detail: message
-    })
-  }
-})
+setAssertReporter(createAssertReporter(pinia))
 
 app.directive('tooltip', Tooltip)
 app
