@@ -20,11 +20,14 @@ export function computeLegacyWidgetShadow(
   const shadow: LegacyWidgetShadowEntry[] = []
   if (!widgetsValues) return shadow
 
-  let i = 0
   for (const [widgetIndex, widget] of widgets.entries()) {
     if (widget.serialize === false) continue
-    if (i >= widgetsValues.length) break
-    shadow.push({ widgetIndex, name: widget.name, value: widgetsValues[i++] })
+    if (widgetIndex >= widgetsValues.length) break
+    shadow.push({
+      widgetIndex,
+      name: widget.name,
+      value: widgetsValues[widgetIndex]
+    })
   }
   return shadow
 }

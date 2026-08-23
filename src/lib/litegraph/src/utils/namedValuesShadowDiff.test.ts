@@ -31,7 +31,8 @@ describe('computeLegacyWidgetShadow', () => {
       makeWidget('action', false),
       makeWidget('seed')
     ]
-    const shadow = computeLegacyWidgetShadow(widgets, [30, 12345])
+    // The non-serialised widget holds its slot as `null` (#15669).
+    const shadow = computeLegacyWidgetShadow(widgets, [30, null, 12345])
     expect(shadow).toEqual([
       { widgetIndex: 0, name: 'steps', value: 30 },
       { widgetIndex: 2, name: 'seed', value: 12345 }

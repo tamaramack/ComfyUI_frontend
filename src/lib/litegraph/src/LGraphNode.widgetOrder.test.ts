@@ -91,7 +91,9 @@ describe('LGraphNode widget ordering', () => {
         flags: {},
         order: 0,
         mode: 0,
-        widgets_values: [30, 12345] // Only serializable widgets
+        // `widgets_values` is aligned to the full widget array, so the
+        // non-serialised button holds slot 1 as `null` (#15669).
+        widgets_values: [30, null, 12345] as unknown as TWidgetValue[]
       }
 
       node.configure(info)

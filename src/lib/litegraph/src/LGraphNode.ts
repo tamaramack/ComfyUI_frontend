@@ -1020,11 +1020,15 @@ export class LGraphNode
           widget.value = namedValues[widget.name]
         }
       } else if (info.widgets_values) {
-        let i = 0
-        for (const widget of this.widgets ?? []) {
+        // `widgets_values` is positionally aligned to `this.widgets`:
+        // `serialize` writes each value at the widget's index in the full
+        // widget array, leaving a `null` placeholder where a widget has
+        // `serialize === false`. Read it back by the same index — a compacted
+        // counter shifts every value after a skipped widget.
+        for (const [i, widget] of this.widgets?.entries() ?? []) {
           if (widget.serialize === false) continue
           if (i >= info.widgets_values.length) break
-          widget.value = info.widgets_values[i++]
+          widget.value = info.widgets_values[i]
         }
       }
     }

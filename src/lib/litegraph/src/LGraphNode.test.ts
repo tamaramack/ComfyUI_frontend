@@ -6,6 +6,7 @@ import type {
   ISerialisedNode
 } from '@/lib/litegraph/src/litegraph'
 import type { Rect } from '@/lib/litegraph/src/interfaces'
+import type { TWidgetValue } from '@/lib/litegraph/src/types/widgets'
 import {
   LGraphNode,
   LiteGraph,
@@ -628,7 +629,9 @@ describe('LGraphNode', () => {
           pos: [100, 100],
           size: [100, 100],
           properties: {},
-          widgets_values: [100]
+          // `widgets_values` is aligned to the full widget array, so the
+          // non-serialisable widget holds slot 0 as `null` (#15669).
+          widgets_values: [null, 100] as unknown as TWidgetValue[]
         })
       )
 
