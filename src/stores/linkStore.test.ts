@@ -240,6 +240,25 @@ describe('useLinkStore', () => {
     expect(connected.value).toBe(true)
   })
 
+  it('discards the previous occupant when a replacement link reuses its id after deletion', () => {
+    // LinkId is a numeric id that can be recycled when a link is removed and a
+    // new connection is created. Once the original is deleted and the store
+    // bucket is cleared, registerLink must accept the replacement without
+    // treating the new link as a collision.
+    const store = useLinkStore()
+    const original = link(1, 5, 0, 9, 2)
+    const registered = store.registerLink(graphA, original)!
+    store.deleteLink(graphA, registered)
+
+    const replacement = link(1, 7, 0, 8, 1)
+    const reRegistered = store.registerLink(graphA, replacement)
+
+    expect(reRegistered).toBeDefined()
+    expect(reRegistered?.id).toBe(toLinkId(1))
+    expect(store.getInputSlotLink(graphA, toNodeId(8), 1)).toBe(reRegistered)
+    expect(store.getInputSlotLink(graphA, toNodeId(9), 2)).toBeUndefined()
+  })
+
   it('scopes by graph and does not clear on tab switch', () => {
     const store = useLinkStore()
     store.registerLink(graphA, link(1, 5, 0, 9, 2))

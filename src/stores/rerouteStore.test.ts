@@ -218,6 +218,27 @@ describe('useRerouteStore', () => {
     ])
   })
 
+  it('discards the previous occupant when a replacement reroute reuses its id after deletion', () => {
+    // RerouteId is a numeric id that can be recycled when a reroute node is
+    // removed and a new one is placed. Once the original is deleted, the store
+    // must accept a fresh chain under the same id without treating it as a
+    // collision.
+    const store = useRerouteStore()
+    const original = store.registerReroute(graphA, chain(1))
+    assert(original)
+    store.deleteReroute(graphA, original)
+
+    const replacement = chain(1, 7)
+    const reRegistered = store.registerReroute(graphA, replacement)
+
+    expect(reRegistered).toBeDefined()
+    expect(reRegistered?.id).toBe(toRerouteId(1))
+    expect(store.getReroute(graphA, toRerouteId(1))).toBe(reRegistered)
+    expect(store.getReroute(graphA, toRerouteId(1))?.parentId).toBe(
+      toRerouteId(7)
+    )
+  })
+
   it('scopes buckets by graph', () => {
     const store = useRerouteStore()
     store.registerReroute(graphA, chain(1))

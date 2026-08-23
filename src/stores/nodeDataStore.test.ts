@@ -217,3 +217,29 @@ describe('nodeDataStore registration via LGraph', () => {
     expect(registeredState(graph, lgraphNode)).toBeUndefined()
   })
 })
+
+describe('nodeDataStore: recycled-id safety', () => {
+  // NodeId is a numeric id that LiteGraph reuses when a node is removed and a
+  // replacement is added. The store must not serve the previous occupant's state
+  // after it has been deleted and a fresh node with the same id is registered.
+  beforeEach(() => {
+    setActivePinia(createTestingPinia({ stubActions: false }))
+  })
+
+  it('discards the previous occupant when a replacement node reuses its id after deletion', () => {
+    const store = useNodeDataStore()
+    const scope = graphScope(rootA, rootA)
+    const original = node(42)
+    store.registerNode(scope, original)
+    store.deleteNode(scope, original)
+
+    const replacement = node(42)
+    const registered = store.registerNode(scope, replacement)
+
+    expect(registered).toBeDefined()
+    expect(registered?.id).toBe(toNodeId(42))
+    expect(store.getGraphNodesFor(rootA, rootA)).toEqual([registered])
+    // The original object must not be surfaced by the store.
+    expect(store.getGraphNodesFor(rootA, rootA)).not.toContain(original)
+  })
+})
