@@ -15,6 +15,7 @@ import type {
   CreditTopupMetadata,
   DefaultViewSetMetadata,
   EnterLinearMetadata,
+  FetchTimeoutMetadata,
   HelpCenterClosedMetadata,
   HelpCenterOpenedMetadata,
   HelpResourceClickedMetadata,
@@ -421,5 +422,9 @@ export class MixpanelTelemetryProvider implements TelemetryProvider {
 
   trackUiButtonClicked(metadata: UiButtonClickMetadata): void {
     this.trackEvent(TelemetryEvents.UI_BUTTON_CLICKED, metadata)
+  }
+
+  trackFetchTimeout(metadata: FetchTimeoutMetadata): void {
+    this.trackEvent(TelemetryEvents.FETCH_TIMEOUT, metadata)
   }
 }
