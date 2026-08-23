@@ -101,9 +101,17 @@ export const useWidgetValueStore = defineStore('widgetValue', () => {
     registerWidgetRenderState(widgetId, renderState)
 
     const existing = getWidget(widgetId)
-    if (existing && existing.type === init.type) {
-      appendNodeWidgetOrder(widgetId)
-      return existing as WidgetState<TValue>
+    if (existing) {
+      if (existing.type === init.type) {
+        appendNodeWidgetOrder(widgetId)
+        return existing as WidgetState<TValue>
+      }
+      // Type mismatch: the key is being reused by a different widget (e.g. after
+      // subgraph convert). The incoming init is authoritative — overwrite the
+      // stale entry rather than rejecting. This is intentionally different from
+      // linkStore/rerouteStore/nodeDataStore, where IDs are identity-stable and
+      // a collision is always an error. Widget keys are slot-addressable and can
+      // legitimately change type across graph mutations.
     }
 
     const { graphId, nodeId, name } = parseWidgetId(widgetId)
