@@ -60,7 +60,7 @@ export function remapLinkReferences(
  * target slot: remapping would hand the loser's origin a link it does not own,
  * so the reference must be deleted rather than repointed.
  */
-export function pruneLinkReferences(
+function pruneLinkReferences(
   data: ConfiguredGraph,
   dropped: ReadonlySet<number>
 ): void {
@@ -102,7 +102,7 @@ export function pruneLinkReferences(
  * lists both ids, so containment cannot discriminate between them - such
  * slots deliberately produce no entry here and fall back to document order.
  */
-export function authoritativeSurvivorByTarget(
+function authoritativeSurvivorByTarget(
   data: ConfiguredGraph
 ): Map<string, number> {
   const authoritative = new Map<string, number>()
