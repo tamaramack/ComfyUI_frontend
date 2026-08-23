@@ -122,7 +122,9 @@ abstract class BaseDOMWidgetImpl<V extends object | string>
   implements BaseDOMWidget<V>
 {
   static readonly DEFAULT_MARGIN = 10
-  declare readonly name: string
+  // `name` is inherited as an accessor from BaseWidget, which re-keys the
+  // widget's store entry on assignment; redeclaring it here as an instance
+  // property would shadow that accessor (TS2610).
   declare readonly options: DOMWidgetOptions<V>
   declare callback?: (value: V) => void
 

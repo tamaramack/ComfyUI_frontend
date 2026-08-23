@@ -77,7 +77,29 @@ export abstract class BaseWidget<TWidget extends IBaseWidget = IBaseWidget>
   }
 
   linkedWidgets?: IBaseWidget[]
-  name: string
+  /**
+   * Backing field for {@link name}. A `#private` field would throw
+   * "Cannot read private member" when the accessor is reached through the Vue
+   * reactive proxy that wraps widgets, so this follows `_node`/`_state`.
+   */
+  private _name!: string
+  /**
+   * The widget's stable identity, and the name segment of its {@link widgetId}.
+   * Assigning it after {@link setNodeId} has registered the widget re-keys the
+   * store entry, because the id embeds the name and nothing else re-registers.
+   */
+  get name(): string {
+    return this._name
+  }
+
+  set name(value: string) {
+    const previous = this._name
+    this._name = value
+    // `undefined` is the constructor's first write, before `_state` exists.
+    if (previous === undefined || previous === value) return
+    this.rekeyStoreEntry(previous)
+  }
+
   options: TWidget['options']
   type: TWidget['type']
   y: number = 0
@@ -158,6 +180,29 @@ export abstract class BaseWidget<TWidget extends IBaseWidget = IBaseWidget>
       deriveWidgetRenderState(this)
     )
     if (registered) this._state = registered
+  }
+
+  /**
+   * Moves this widget's store entry from the id its previous name minted to the
+   * id its current name mints. No-op while the widget is unregistered — there is
+   * nothing keyed yet, and {@link setNodeId} will register under the new name.
+   */
+  private rekeyStoreEntry(previousName: string): void {
+    const graphId = this.node.graph?.rootGraph.id
+    const state: WidgetState | undefined = this._state as
+      | WidgetState
+      | undefined
+    const nodeId = state?.nodeId
+    if (!graphId || nodeId === undefined) return
+
+    const nextId = this.widgetId
+    if (!nextId) return
+
+    const moved = useWidgetValueStore().renameWidget(
+      widgetId(graphId, nodeId, previousName),
+      nextId
+    )
+    if (moved) this._state = moved
   }
 
   constructor(widget: TWidget & { node: LGraphNode })
