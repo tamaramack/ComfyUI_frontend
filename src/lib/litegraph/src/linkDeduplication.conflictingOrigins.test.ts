@@ -2,6 +2,7 @@ import { createTestingPinia } from '@pinia/testing'
 import { setActivePinia } from 'pinia'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
+import { SUBGRAPH_OUTPUT_ID } from '@/lib/litegraph/src/constants'
 import { LGraph, LGraphNode, LiteGraph } from '@/lib/litegraph/src/litegraph'
 import type { SerialisedLLinkArray } from '@/lib/litegraph/src/LLink'
 import type { SerialisableLLink } from '@/lib/litegraph/src/types/serialisation'
@@ -11,7 +12,10 @@ import { toLinkId } from '@/types/linkId'
 import { toNodeId } from '@/types/nodeId'
 import type { NodeId } from '@/types/nodeId'
 
-import { conflictingOriginLinksRoot } from './__fixtures__/duplicateLinks'
+import {
+  conflictingOriginLinksRoot,
+  conflictingOriginLinksSubgraphBoundary
+} from './__fixtures__/duplicateLinks'
 
 class DupTestNode extends LGraphNode {
   constructor(title?: string) {
@@ -71,7 +75,7 @@ describe('normalizeConfiguredTopology with conflicting origins (#15577)', () => 
     LiteGraph.registerNodeType('test/DupTestNode', DupTestNode)
   })
 
-  it.fails('keeps the link that input.link references', () => {
+  it('keeps the link that input.link references', () => {
     const graph = configureConflictingOrigins()
 
     expect(graph.getNodeById(toNodeId(3))?.getInputLink(0)?.origin_id).toBe(
@@ -79,7 +83,7 @@ describe('normalizeConfiguredTopology with conflicting origins (#15577)', () => 
     )
   })
 
-  it.fails('warns when a link is dropped in favour of a different origin', () => {
+  it('warns when a link is dropped in favour of a different origin', () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
 
     configureConflictingOrigins()
@@ -97,7 +101,7 @@ describe('normalizeConfiguredTopology with conflicting origins (#15577)', () => 
     expect(graph.getNodeById(toNodeId(3))?.getInputLink(0)).toBeDefined()
   })
 
-  it.fails('re-saves the workflow without changing the upstream node', () => {
+  it('re-saves the workflow without changing the upstream node', () => {
     const graph = configureConflictingOrigins()
 
     const [survivor] = linksIntoTargetSlot(
@@ -107,6 +111,29 @@ describe('normalizeConfiguredTopology with conflicting origins (#15577)', () => 
     )
 
     expect(survivor?.origin_id).toBe(toNodeId(2))
+  })
+})
+
+describe('conflicting origins at a subgraph output boundary (#15577)', () => {
+  beforeEach(() => {
+    setActivePinia(createTestingPinia({ stubActions: false }))
+    LiteGraph.registerNodeType('test/DupTestNode', DupTestNode)
+  })
+
+  it('keeps exactly one link and prunes the dropped id from linkIds', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+
+    const graph = new LGraph()
+    graph.configure(structuredClone(conflictingOriginLinksSubgraphBoundary))
+    const subgraph = graph.subgraphs.get(
+      'dd222222-2222-4222-8222-222222222222'
+    )!
+
+    expect(subgraph.links.size).toBe(1)
+    expect(subgraph.outputs[0].linkIds).toEqual([toLinkId(1)])
+    expect(warn.mock.calls.flat().join(' ')).toContain(
+      `${SUBGRAPH_OUTPUT_ID}:0`
+    )
   })
 })
 

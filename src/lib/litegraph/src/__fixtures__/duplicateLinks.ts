@@ -142,6 +142,107 @@ export const conflictingOriginLinksRoot: SerialisableGraph = {
 }
 
 /**
+ * Root graph containing a SubgraphNode whose subgraph definition has two
+ * links from different origins into the same subgraph output boundary slot.
+ * The boundary slot's `linkIds` array lists both candidates, so the target
+ * side cannot name a single survivor and document order must win, with the
+ * dropped id pruned from `linkIds` rather than left dangling.
+ */
+export const conflictingOriginLinksSubgraphBoundary: SerialisableGraph = {
+  id: 'dd000000-0000-4000-8000-000000000005',
+  version: 1,
+  revision: 0,
+  state: {
+    lastNodeId: 1,
+    lastLinkId: 0,
+    lastGroupId: 0,
+    lastRerouteId: 0
+  },
+  nodes: [
+    {
+      id: 1,
+      type: 'dd222222-2222-4222-8222-222222222222',
+      pos: [0, 0],
+      size: [200, 100],
+      flags: {},
+      order: 0,
+      mode: 0,
+      properties: {}
+    }
+  ],
+  definitions: {
+    subgraphs: [
+      {
+        id: 'dd222222-2222-4222-8222-222222222222',
+        version: 1,
+        revision: 0,
+        state: {
+          lastNodeId: 2,
+          lastLinkId: 2,
+          lastGroupId: 0,
+          lastRerouteId: 0
+        },
+        name: 'Subgraph With Conflicting Boundary Links',
+        config: {},
+        inputNode: { id: SUBGRAPH_INPUT_ID, bounding: [0, 100, 120, 60] },
+        outputNode: { id: SUBGRAPH_OUTPUT_ID, bounding: [500, 100, 120, 60] },
+        inputs: [],
+        outputs: [
+          { id: 'output', name: 'output', type: 'number', linkIds: [1, 2] }
+        ],
+        widgets: [],
+        nodes: [
+          {
+            id: 1,
+            type: 'test/DupTestNode',
+            pos: [100, 100],
+            size: [200, 100],
+            flags: {},
+            order: 0,
+            mode: 0,
+            inputs: [{ name: 'input_0', type: 'number', link: null }],
+            outputs: [{ name: 'output_0', type: 'number', links: [1] }],
+            properties: {}
+          },
+          {
+            id: 2,
+            type: 'test/DupTestNode',
+            pos: [100, 300],
+            size: [200, 100],
+            flags: {},
+            order: 1,
+            mode: 0,
+            inputs: [{ name: 'input_0', type: 'number', link: null }],
+            outputs: [{ name: 'output_0', type: 'number', links: [2] }],
+            properties: {}
+          }
+        ],
+        groups: [],
+        links: [
+          {
+            id: 1,
+            origin_id: 1,
+            origin_slot: 0,
+            target_id: SUBGRAPH_OUTPUT_ID,
+            target_slot: 0,
+            type: 'number'
+          },
+          {
+            id: 2,
+            origin_id: 2,
+            origin_slot: 0,
+            target_id: SUBGRAPH_OUTPUT_ID,
+            target_slot: 0,
+            type: 'number'
+          }
+        ],
+        extra: {}
+      }
+    ]
+  }
+}
+
+/**
  * Root graph with slot-shifted duplicates. Target node has an extra input
  * (simulating widget-to-input conversion) that shifts the connected input
  * from slot 0 to slot 1. Link 1 is valid (referenced by input.link),

@@ -109,8 +109,8 @@ function shiftedNodesAndLinks(sourceId: number, targetId: number) {
 /**
  * As {@link shiftedNodesAndLinks}, but `in_a` carries a duplicate link: the
  * link registered first (id 3) is not the id the serialized input references
- * (id 4). Registration rejects 4, so realignment must follow
- * the rejected alias through to the registered link to correct its slot.
+ * (id 4). The input reference is authoritative, so registration keeps 4 and
+ * rejects 3; realignment must still correct the survivor's slot.
  */
 function duplicateDriftedNodesAndLinks(sourceId: number, targetId: number) {
   const base = shiftedNodesAndLinks(sourceId, targetId)
@@ -288,12 +288,18 @@ const LINK_BY_INPUT_NAME: Record<string, number> = {
   in_c: 2
 }
 
-function assertLinksRealigned(graph: LGraph, targetNodeId: NodeId) {
+function assertLinksRealigned(
+  graph: LGraph,
+  targetNodeId: NodeId,
+  overrides: Record<string, number> = {}
+) {
   const target = graph.getNodeById(targetNodeId)!
   const linkStore = useLinkStore()
 
   for (const [slot, input] of target.inputs.entries()) {
-    const expectedLinkId = toLinkId(LINK_BY_INPUT_NAME[input.name])
+    const expectedLinkId = toLinkId(
+      overrides[input.name] ?? LINK_BY_INPUT_NAME[input.name]
+    )
     const link = graph.links.get(expectedLinkId)!
 
     expect(link.target_slot, `link.target_slot for input ${input.name}`).toBe(
@@ -339,8 +345,8 @@ describe('LGraph.configure input slot realignment (#3348)', () => {
     const graph = new LGraph()
     graph.configure(savedWorkflow({ duplicate: true }))
 
-    expect(graph.links.has(toLinkId(4))).toBe(false)
-    assertLinksRealigned(graph, toNodeId(2))
+    expect(graph.links.has(toLinkId(3))).toBe(false)
+    assertLinksRealigned(graph, toNodeId(2), { in_a: 4 })
   })
 
   it('maps a rejected subgraph input fanout branch to its exact survivor', () => {
@@ -355,7 +361,7 @@ describe('LGraph.configure input slot realignment (#3348)', () => {
     graph.configure(workflow)
 
     const subgraph = graph.subgraphs.get(SUBGRAPH_ID)!
-    expect(subgraph.inputs[0].linkIds).toEqual([toLinkId(2)])
+    expect(subgraph.inputs[0].linkIds).toEqual([toLinkId(3)])
   })
 
   it('uses the first slot when one link is referenced by multiple inputs', () => {
