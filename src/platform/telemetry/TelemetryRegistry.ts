@@ -42,6 +42,7 @@ import type {
   TabCountMetadata,
   TelemetryDispatcher,
   TelemetryProvider,
+  FetchTimeoutMetadata,
   TemplateFilterMetadata,
   TemplateLibraryClosedMetadata,
   TemplateLibraryMetadata,
@@ -359,5 +360,9 @@ export class TelemetryRegistry implements TelemetryDispatcher {
 
   trackPageView(pageName: string, properties?: PageViewMetadata): void {
     this.dispatch((provider) => provider.trackPageView?.(pageName, properties))
+  }
+
+  trackFetchTimeout(metadata: FetchTimeoutMetadata): void {
+    this.dispatch((provider) => provider.trackFetchTimeout?.(metadata))
   }
 }

@@ -517,7 +517,7 @@ export class ComfyApi extends EventTarget {
         data: { duration_ms, timeout_ms: FETCH_TIMEOUT_MS }
       })
 
-      useTelemetry()?.trackFetchTimeout?.({
+      useTelemetry()?.trackFetchTimeout({
         route,
         method,
         duration_ms,
