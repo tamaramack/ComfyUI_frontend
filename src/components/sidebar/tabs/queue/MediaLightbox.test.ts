@@ -1,5 +1,5 @@
-import { fireEvent, render, screen } from '@testing-library/vue'
 import userEvent from '@testing-library/user-event'
+import { fireEvent, render, screen } from '@testing-library/vue'
 import { describe, expect, it, vi } from 'vitest'
 import { nextTick } from 'vue'
 import { createI18n } from 'vue-i18n'
@@ -7,16 +7,6 @@ import { createI18n } from 'vue-i18n'
 import type { AugmentedResultItem } from '@/utils/resultItem'
 
 import MediaLightbox from './MediaLightbox.vue'
-
-vi.mock('@/platform/settings/settingStore', () => ({
-  useSettingStore: () => ({ get: () => undefined })
-}))
-vi.mock('@/stores/extensionStore', () => ({
-  useExtensionStore: () => ({
-    isExtensionInstalled: () => false,
-    isExtensionEnabled: () => false
-  })
-}))
 
 const i18n = createI18n({
   legacy: false,
@@ -147,9 +137,9 @@ describe('MediaLightbox', () => {
   it('shows gallery when activeIndex changes from -1', async () => {
     const { rerender, container } = renderGallery({ activeIndex: -1 })
 
-    /* eslint-disable testing-library/no-container, testing-library/no-node-access */
+    /* oxlint-disable testing-library/no-container, testing-library/no-node-access */
     expect(container.querySelector('[data-mask]')).not.toBeInTheDocument()
-    /* eslint-enable testing-library/no-container, testing-library/no-node-access */
+    /* oxlint-enable testing-library/no-container, testing-library/no-node-access */
 
     await rerender({
       allGalleryItems: mockGalleryItems,
@@ -157,9 +147,9 @@ describe('MediaLightbox', () => {
     })
     await nextTick()
 
-    /* eslint-disable testing-library/no-container, testing-library/no-node-access */
+    /* oxlint-disable testing-library/no-container, testing-library/no-node-access */
     expect(container.querySelector('[data-mask]')).toBeInTheDocument()
-    /* eslint-enable testing-library/no-container, testing-library/no-node-access */
+    /* oxlint-enable testing-library/no-container, testing-library/no-node-access */
   })
 
   it('emits update:activeIndex with -1 when close button clicked', async () => {
@@ -173,10 +163,7 @@ describe('MediaLightbox', () => {
   })
 
   it('keeps failed text media actionable until the viewer closes', async () => {
-    const fetchMock = vi.fn(() =>
-      Promise.resolve(new Response(null, { status: 503 }))
-    )
-    vi.stubGlobal('fetch', fetchMock)
+    vi.mocked(fetch).mockResolvedValueOnce(new Response(null, { status: 503 }))
 
     const { user } = renderGallery(
       {
@@ -193,14 +180,14 @@ describe('MediaLightbox', () => {
     )
 
     expect(await screen.findByText('Text failed to load')).toBeInTheDocument()
-    expect(fetchMock).toHaveBeenCalledWith('/api/view?filename=failed.txt')
+    expect(fetch).toHaveBeenCalledWith('/api/view?filename=failed.txt')
 
     await user.click(screen.getByLabelText('Close'))
 
     expect(screen.queryByText('Text failed to load')).not.toBeInTheDocument()
   })
 
-  /* eslint-disable testing-library/prefer-user-event -- keyDown on dialog element for navigation, not text input */
+  /* oxlint-disable testing-library/prefer-user-event -- keyDown on dialog element for navigation, not text input */
   describe('keyboard navigation', () => {
     it('navigates to next item on ArrowRight', async () => {
       const { onUpdateActiveIndex } = renderGallery({ activeIndex: 0 })
@@ -250,9 +237,9 @@ describe('MediaLightbox', () => {
       expect(onUpdateActiveIndex).toHaveBeenCalledWith(-1)
     })
   })
-  /* eslint-enable testing-library/prefer-user-event */
+  /* oxlint-enable testing-library/prefer-user-event */
 
-  /* eslint-disable testing-library/no-node-access -- element identity is the behavior under test: the browser only keeps a video's buffer if the same node survives navigation. The real Teleport must render (the test-utils teleport stub remounts its subtree and would defeat KeepAlive), so queries go through document.body. */
+  /* oxlint-disable testing-library/no-node-access -- element identity is the behavior under test: the browser only keeps a video's buffer if the same node survives navigation. The real Teleport must render (the test-utils teleport stub remounts its subtree and would defeat KeepAlive), so queries go through document.body. */
   describe('video retention across navigation', () => {
     const videoItem = (n: number): MockResultItem => ({
       filename: `v${n}.mp4`,
@@ -349,5 +336,5 @@ describe('MediaLightbox', () => {
       expect(reopened).not.toBe(first)
     })
   })
-  /* eslint-enable testing-library/no-node-access */
+  /* oxlint-enable testing-library/no-node-access */
 })

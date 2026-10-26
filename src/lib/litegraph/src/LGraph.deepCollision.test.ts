@@ -1,6 +1,4 @@
-import { createTestingPinia } from '@pinia/testing'
-import { setActivePinia } from 'pinia'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it } from 'vitest'
 
 import { parseProxyWidgets } from '@/core/schemas/promotionSchema'
 import type {
@@ -237,9 +235,7 @@ function scopesOf(graph: LGraph): { name: string; graph: LGraph | Subgraph }[] {
 }
 
 beforeEach(() => {
-  setActivePinia(createTestingPinia({ stubActions: false }))
   LiteGraph.registerNodeType('dummy', DummyNode)
-  vi.spyOn(console, 'warn').mockImplementation(() => {})
 })
 
 describe('LGraph.configure with simultaneous cross-scope ID collisions', () => {

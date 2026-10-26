@@ -1,4 +1,5 @@
-import type { LGraphNode } from '@/lib/litegraph/src/LGraphNode'
+import type { LGraphNode } from '@/lib/litegraph/src/types/entityRegistry'
+
 import type {
   IBaseWidget,
   IWidgetOptions
@@ -51,6 +52,16 @@ export function evaluateInput(input: string): number | undefined {
   return newValue
 }
 
+export function findComboValueIndex(
+  values: readonly (string | number)[],
+  currentValue: string | number
+): number {
+  const exactIndex = values.indexOf(currentValue)
+  return exactIndex === -1
+    ? values.findIndex((value) => String(value) === String(currentValue))
+    : exactIndex
+}
+
 export function getWidgetIds(
   widgets: readonly { readonly widgetId?: WidgetId }[]
 ): WidgetId[] {
@@ -73,7 +84,6 @@ export function deriveWidgetRenderState(
   widget: Readonly<IBaseWidget>
 ): WidgetRenderState {
   return {
-    advanced: widget.options.advanced ?? widget.advanced,
     hasLayoutSize: typeof widget.computeLayoutSize === 'function',
     isDOMWidget: isDOMBackedWidget(widget),
     tooltip: widget.tooltip

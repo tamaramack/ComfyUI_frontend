@@ -1,4 +1,4 @@
-import type { IColorWidget } from '../types/widgets'
+import type { IColorWidget } from '@/lib/litegraph/src/types/widgets'
 import { hexToInt, intToHex } from '@/utils/colorUtil'
 import type { DrawWidgetOptions, WidgetEventOptions } from './BaseWidget'
 import { BaseWidget } from './BaseWidget'
@@ -27,8 +27,6 @@ export class ColorWidget
   extends BaseWidget<IColorWidget>
   implements IColorWidget
 {
-  override type = 'color' as const
-
   private get hexValue(): string {
     return typeof this.value === 'number'
       ? intToHex(this.value)

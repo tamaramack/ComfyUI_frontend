@@ -7,14 +7,9 @@ import {
   useIntWidget
 } from '@/renderer/extensions/vueNodes/widgets/composables/useIntWidget'
 
-vi.mock('@/scripts/widgets', () => ({
+vi.mock(import('@/scripts/app'))
+vi.mock(import('@/core/graph/widgets/valueControlWidgets'), () => ({
   addValueControlWidget: vi.fn()
-}))
-
-vi.mock('@/platform/settings/settingStore', () => ({
-  useSettingStore: () => ({
-    get: vi.fn(() => false)
-  })
 }))
 
 const { onValueChange } = _for_testing

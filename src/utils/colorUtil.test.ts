@@ -32,7 +32,7 @@ interface ColorTestCase {
 
 type ColorFormat = 'hex' | 'rgb' | 'rgba' | 'hsl' | 'hsla'
 
-vi.mock('es-toolkit/compat', () => ({
+vi.mock<unknown>(import('es-toolkit/compat'), () => ({
   memoize: <T extends (...args: unknown[]) => unknown>(fn: T) => fn
 }))
 
@@ -403,9 +403,9 @@ describe('colorUtil - adjustColor', () => {
   })
 
   it('returns the original value for null or undefined inputs', () => {
-    // @ts-expect-error fixme ts strict error
+    // @ts-expect-error extensions may pass a nullish color; the contract type is string
     expect(adjustColor(null, { opacity: targetOpacity })).toBe(null)
-    // @ts-expect-error fixme ts strict error
+    // @ts-expect-error extensions may pass a nullish color; the contract type is string
     expect(adjustColor(undefined, { opacity: targetOpacity })).toBe(undefined)
   })
 

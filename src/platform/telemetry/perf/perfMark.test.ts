@@ -1,16 +1,12 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 
 import { perfMark, perfPoint } from './perfMark'
 
 const { addBreadcrumb } = vi.hoisted(() => ({ addBreadcrumb: vi.fn() }))
 
-vi.mock('@sentry/vue', () => ({ addBreadcrumb }))
+vi.mock(import('@sentry/vue'), () => ({ addBreadcrumb }))
 
 describe('perfMark', () => {
-  beforeEach(() => {
-    addBreadcrumb.mockReset()
-  })
-
   it('degrades to no-op tracing without the Performance API', async () => {
     vi.stubGlobal('performance', undefined)
 
